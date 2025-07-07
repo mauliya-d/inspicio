@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Inspicio</title>
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    .text-container {
+      width: 100%;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    #textInput {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 1rem;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .right-align {
+      margin-left: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 style="text-align: center;">Inspicio</h1>
+
+  <div class="text-container">
+    <textarea id="textInput" placeholder="Paste your text here..."></textarea>
+
+    <div class="button-row">
+      <button onclick="loadLatinText()"> 🔃 Load AENEID</button>
+      <button onclick="clearText()"> 🗑️ Clear Text</button>
+      <button onclick="startRevision()" class="right-align"> 🚩 Start Revising</button>
+    </div>
+  </div>
+
+
+  <script>
+    // Restore session data if available
+    if (sessionStorage.getItem("rawText")) {
+      document.getElementById("textInput").value = sessionStorage.getItem("rawText");
+    }
+
+    // Load text from latinText.txt into the textarea
+    function loadLatinText() {
+      fetch('assets/LatinN25.txt')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to load latinText.txt');
+          }
+          return response.text();
+        })
+        .then(text => {
+          document.getElementById("textInput").value = text;
+        })
+        .catch(error => {
+          alert("Error loading Latin text: " + error.message);
+        });
+    }
+
+    // Save text and redirect to revise.html
+    function startRevision() {
+      const text = document.getElementById("textInput").value.trim();
+      if (!text) return alert("Please paste your Latin text first.");
+      sessionStorage.setItem("rawText", text);
+      window.location.href = "revise.html";
+    }
+
+    // Clear the text area and sessionStorage
+    function clearText() {
+      document.getElementById("textInput").value = "";
+      sessionStorage.removeItem("rawText");
+    }
+  </script>
+</body>
+
+</html>

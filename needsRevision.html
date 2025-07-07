@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Inspicio - Needs Revision</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f8f9fa;
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        ul {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            list-style: none;
+        }
+
+        li {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 2rem;
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Needs Revision</h1>
+    <ul id="revisionList">
+        <!-- JS will insert items here -->
+    </ul>
+
+    <a href="revise.html">← Back to Revision</a>
+
+    <script>
+        const raw = sessionStorage.getItem("needsRevisionMap");
+
+        if (!raw) {
+            document.getElementById("revisionList").innerHTML = "<li>No lines were marked for revision.</li>";
+        } else {
+            const map = JSON.parse(raw);
+            const list = document.getElementById("revisionList");
+            const entries = Object.entries(map);
+
+            if (entries.length === 0) {
+                list.innerHTML = "<li>No lines were marked for revision.</li>";
+            } else {
+                entries.forEach(([line, count], index) => {
+                    const item = document.createElement("li");
+                    item.textContent = `${index + 1}. ${line} (${count}x)`;
+                    list.appendChild(item);
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

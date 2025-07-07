@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Inspicio - Revising</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f8f9fa;
+    }
+
+    #lineDisplay {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      min-height: 80px;
+    }
+
+    button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+
+    #score {
+      margin: 1rem 0;
+      font-size: 1.1rem;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 2rem;
+      text-decoration: none;
+      color: #007bff;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Revise</h1>
+  <div id="lineDisplay">Loading...</div>
+
+  <!-- Line 1 -->
+  <div>
+    <button onclick="prevLine()">⬆️ Previous Line</button>
+    <button onclick="nextLine()">⬇️ Next Line</button>
+  </div>
+
+  <!-- Line 2 -->
+  <div>
+    <button onclick="randomLine()">🎲 New Line</button>
+  </div>
+
+  <!-- Line 3 -->
+  <div>
+    <button onclick="mark('gotIt')">✅ I Got it!</button>
+    <button onclick="mark('needsRevision')" >❌ Needs revision</button>
+  </div>
+
+  <!-- Line 4 -->
+  <p id="score">
+    ✅ Got it: <span id="gotItCount">0</span> | ❌ Needs revision: <span id="needsCount">0</span>
+  </p>
+
+  <!-- Line 5 -->
+  <div>
+    <button onclick="clearScores()" style="background-color: #dd4422; color: white;">🗑️ Clear Scores</button>
+    <button onclick="showNeedsRevision()" style="background-color: var(--accent)" >📋 View Needs Revision</button>
+  </div>
+
+  <!-- Line 6 -->
+  <a href="index.html">← Back to text</a>
+
+  <script>
+    let lines = [];
+    let currentIndex = 0;
+    let gotIt = 0;
+    let needsRevision = 0;
+    let needsRevisionMap = {};
+
+    const rawText = sessionStorage.getItem("rawText");
+
+    if (!rawText) {
+      document.getElementById("lineDisplay").innerText = "No text found. Please go back.";
+    } else {
+      lines = rawText.split(/\r?\n/).filter(line => line.trim() !== "");
+
+      const savedMap = sessionStorage.getItem("needsRevisionMap");
+      if (savedMap) {
+        needsRevisionMap = JSON.parse(savedMap);
+        needsRevision = Object.values(needsRevisionMap).reduce((a, b) => a + b, 0);
+      }
+
+      const savedGotIt = sessionStorage.getItem("gotIt");
+      if (savedGotIt) {
+        gotIt = parseInt(savedGotIt, 10);
+      }
+
+      updateScore();
+      randomLine();
+    }
+
+    function displayLine() {
+      document.getElementById("lineDisplay").innerText = lines[currentIndex];
+    }
+
+    function randomLine() {
+      if (lines.length === 0) return;
+      currentIndex = Math.floor(Math.random() * lines.length);
+      displayLine();
+    }
+
+    function prevLine() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        displayLine();
+      }
+    }
+
+    function nextLine() {
+      if (currentIndex < lines.length - 1) {
+        currentIndex++;
+        displayLine();
+      }
+    }
+
+    function mark(type) {
+      if (type === "gotIt") {
+        gotIt++;
+        sessionStorage.setItem("gotIt", gotIt);
+      } else if (type === "needsRevision") {
+        needsRevision++;
+        const line = lines[currentIndex];
+        if (needsRevisionMap[line]) {
+          needsRevisionMap[line]++;
+        } else {
+          needsRevisionMap[line] = 1;
+        }
+        sessionStorage.setItem("needsRevisionMap", JSON.stringify(needsRevisionMap));
+      }
+      updateScore();
+      randomLine();
+    }
+
+    function updateScore() {
+      const totalNeedsRevision = Object.values(needsRevisionMap).reduce((a, b) => a + b, 0);
+
+      document.getElementById("gotItCount").innerText = gotIt;
+      document.getElementById("needsCount").innerText = totalNeedsRevision;
+
+      sessionStorage.setItem("needsRevisionMap", JSON.stringify(needsRevisionMap));
+      sessionStorage.setItem("gotIt", gotIt);
+    }
+
+    function showNeedsRevision() {
+      if (Object.keys(needsRevisionMap).length === 0) {
+        alert("No lines marked for revision.");
+        return;
+      }
+      sessionStorage.setItem("needsRevisionMap", JSON.stringify(needsRevisionMap));
+      window.location.href = "needsRevision.html";
+    }
+
+    function clearScores() {
+      if (confirm("You are about to reset your score to 0. ARE YOU SURE?")) {
+        gotIt = 0;
+        needsRevision = 0;
+        needsRevisionMap = {};
+
+        sessionStorage.removeItem("needsRevisionMap");
+        sessionStorage.removeItem("gotIt");
+
+        updateScore();
+      }
+    }
+  </script>
+</body>
+
+</html>
